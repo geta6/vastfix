@@ -52,7 +52,7 @@ export default class Home extends Component<Props, State> {
       try {
         const { path } = this.state;
         const output = path.replace(/\.mp4$/, `.${Date.now()}.mp4`);
-        const res = await ffmpeg(['-i', path, '-c:v', 'copy', '-af', 'loudnorm=I=-24:LRA=1', '-ar', '48000', output]);
+        await ffmpeg(['-i', path, '-c:v', 'copy', '-af', 'loudnorm=I=-24:LRA=1', '-ar', '48000', output]);
         this.setState({ path: output }, () => {
           this.handleAnalyze();
         });
@@ -67,6 +67,7 @@ export default class Home extends Component<Props, State> {
       const { path } = this.state;
       try {
         const res = await ffmpeg(['-nostats', '-i', path, '-filter_complex', 'ebur128', '-f', 'null', '-']);
+        console.log(res);
         const lufs = parseFloat(
           res
             .split('\n')
@@ -76,6 +77,8 @@ export default class Home extends Component<Props, State> {
             .trim()
         );
         this.setState({ analyzed: true, lufs, path });
+      } catch (e) {
+        alert(e);
       } finally {
         this.setState({ analyzing: false });
       }
